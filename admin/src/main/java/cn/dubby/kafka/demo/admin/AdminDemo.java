@@ -1,7 +1,6 @@
 package cn.dubby.kafka.demo.admin;
 
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.DescribeClusterResult;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
