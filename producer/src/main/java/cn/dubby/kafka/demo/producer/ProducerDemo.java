@@ -17,7 +17,7 @@ public class ProducerDemo {
 
     public static void main(String[] args) {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "daoxuan.pin.com:9092");
+        props.put("bootstrap.servers", "kafka1:9092,kafka2:9092,kafka3:9092");
         props.put("acks", "all");
         props.put("delivery.timeout.ms", 30000);
         props.put("request.timeout.ms", 10000);
@@ -31,11 +31,14 @@ public class ProducerDemo {
         Producer<String, String> producer = new KafkaProducer<>(props);
         while (true) {
             try {
-                Thread.sleep(random.nextInt(100) + 10);
+                Thread.sleep(random.nextInt(1000) + 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            producer.send(new ProducerRecord<>(TOPIC, "key:" + random.nextLong(), "value:" + random.nextLong()));
+            String key = "key:" + random.nextLong();
+            String value = "value:" + random.nextLong();
+            producer.send(new ProducerRecord<>(TOPIC, key, value));
+            System.out.println(key + "\t" + value);
         }
 
         //producer.close();
