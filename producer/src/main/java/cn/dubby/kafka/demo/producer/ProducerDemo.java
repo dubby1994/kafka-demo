@@ -31,7 +31,7 @@ public class ProducerDemo {
         Producer<String, String> producer = new KafkaProducer<>(props);
         while (true) {
             try {
-                Thread.sleep(random.nextInt(1000) + 1000);
+                Thread.sleep(random.nextInt(100) + 100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
