@@ -1,5 +1,7 @@
 package cn.dubby.kafka.demo.producer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -21,9 +23,11 @@ public class ProducerDemo {
 
     private static final Logger logger = LoggerFactory.getLogger("ProducerDemo");
 
-    private final static String TOPIC = "dubby-topic";
+    private final static String TOPIC = "flink-source";
 
-    public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
+    private final static ObjectMapper objectMapper = new ObjectMapper();
+
+    public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException, JsonProcessingException {
         Properties props = new Properties();
         props.put("bootstrap.servers", "localhost:9092");
         props.put("acks", "all");
@@ -37,19 +41,30 @@ public class ProducerDemo {
 
         Producer<String, String> producer = new KafkaProducer<>(props);
 
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, "key", "value");
+        for (int j = 0; j < 10000; ++j) {
+            for (long i = 0; i < 10000; ++i) {
+                Event event = new Event();
+                event.setMallId(i);
+                event.setTimestamp(System.currentTimeMillis());
+                event.setMessageCount(1);
 
-        //同步发送
-        RecordMetadata recordMetadata = producer.send(producerRecord).get(10, TimeUnit.SECONDS);
-        printMetadata(recordMetadata);
+                String json = objectMapper.writeValueAsString(event);
+                logger.info(json);
+                ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, "key" + event.getTimestamp(), json);
 
-        //异步
-        producer.send(producerRecord, new Callback() {
-            @Override
-            public void onCompletion(RecordMetadata metadata, Exception exception) {
+                //同步发送
+                RecordMetadata recordMetadata = producer.send(producerRecord).get(10, TimeUnit.SECONDS);
                 printMetadata(recordMetadata);
             }
-        });
+        }
+
+        //异步
+//        producer.send(producerRecord, new Callback() {
+//            @Override
+//            public void onCompletion(RecordMetadata metadata, Exception exception) {
+//                printMetadata(recordMetadata);
+//            }
+//        });
 
         Thread.sleep(1000);
         producer.close();
